@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Scatter Bomb</title>
+        <script src="https://d3js.org/d3.v5.min.js"></script>
+        <style>
+            svg {
+                background-color: #EADBC4;
+                border-style: solid;
+                border-width: 2px;
+                margin: 3px;
+            }
+        </style>
+    </head>
+    <body>
+        <script>
+            const margin = {
+                top: 10,
+                right: 10,
+                bottom: 10,
+                left: 10
+            }
+
+            const colors = [
+                '#4287f5',
+                '#fabbbb',
+                '#fa9b4d',
+                '#fae64d',
+                '#87fa4d',
+                '#4dfad7',
+                '#984dfa',
+                '#fa4df1'
+            ]
+
+            const svg = d3.select('body').append('svg')
+            svg.attr('width', 800)
+            svg.attr('height', 400)
+
+            const g = svg.append('g')
+            g.attr('transform', `translate(${margin.left}, ${margin.top})`)
+            const width = svg.attr('width') - margin.left - margin.right
+            const height = svg.attr('height') - margin.top - margin.bottom
+
+            g.append('rect')
+                .attr('x', 0).attr('y', 0)
+                .attr('width', width).attr('height', height)
+                .attr('fill', 'black')
+                .attr('opacity', 0)
+
+            const xMax = 500
+            const yMax = 250
+
+            const createRandomPoint = () => {
+                const x = Math.floor(Math.random() * xMax)
+                const y = Math.floor(Math.random() * yMax)
+                return { x, y }
+            }
+
+            const getRandomColor = () => {
+                const len = colors.length
+                const rand = Math.floor(Math.random() * len)
+                return colors[rand]
+            }
+
+            let dataset = []
+            for (let i = 0; i < 300; i++) {
+                dataset.push(createRandomPoint())
+            }
+
+            const xScale = d3.scaleLinear().domain([0, xMax]).range([0, width])
+            const yScale = d3.scaleLinear().domain([yMax, 0]).range([0, height])
+
+            const allPoints = g.selectAll('.point')
+                .data(dataset).enter()
+                .append('circle')
+                    .attr('class', 'point')
+                    .attr('cx', d => xScale(d.x))
+                    .attr('cy', d => yScale(d.y))
+                    .attr('r', 2)
+
+            function detonate (d, i) {
+                d3.select(this)
+                    .transition()
+                    .delay(i * 25)
+                    .duration(2000)
+                    .ease(d3.easeElasticOut)
+                    .attr('fill', getRandomColor)
+                    .attr('r', 25)
+            }
+
+            svg.append('rect')
+                .attr('x', 0).attr('y', 0)
+                .attr('width', svg.attr('width'))
+                .attr('height', svg.attr('height'))
+                .attr('opacity', 0)
+                .on('click', () => allPoints.each(detonate))
+
+        </script>
+    </body>
+</html>
